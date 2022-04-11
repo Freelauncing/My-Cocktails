@@ -31,7 +31,7 @@
             android:layout_weight="1"
             android:elevation="10dp"
             android:hint="Add Product"
-            android:text="Category"
+            android:text="By Category"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:theme="@style/Theme.MaterialComponents.Light"
@@ -52,7 +52,7 @@
             android:layout_marginRight="16dp"
             android:layout_weight="1"
             android:elevation="10dp"
-            android:text="Ingredients"
+            android:text="By Ingredients"
             android:textAllCaps="false"
             android:textColor="@color/white"
             android:theme="@style/Theme.MaterialComponents.Light"
@@ -235,6 +235,7 @@
                         android:layout_below="@id/linearLayoutCompat3"
                         android:orientation="vertical">
                         <com.google.android.material.button.MaterialButton
+                            android:id="@+id/perfromSearch"
                             android:layout_width="match_parent"
                             android:layout_height="65dp"
                             android:layout_marginStart="16dp"

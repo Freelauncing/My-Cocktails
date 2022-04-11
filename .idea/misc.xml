@@ -4,8 +4,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/drawable/bg_rounded_grey.xml" value="0.169" />
+        <entry key="app/src/main/res/drawable/ic_baseline_info_24.xml" value="0.1405" />
+        <entry key="app/src/main/res/drawable/item_search_result.xml" value="0.1405" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/activity_search_details.xml" value="0.19882246376811594" />
         <entry key="app/src/main/res/layout/activity_search_result.xml" value="0.19882246376811594" />
+        <entry key="app/src/main/res/layout/item_search_result.xml" value="0.5" />
       </map>
     </option>
   </component>
