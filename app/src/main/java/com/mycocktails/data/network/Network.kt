@@ -184,8 +184,8 @@ class Network private constructor (context: Context) {
         var result = ""
 
         for (i in 1 until 16){
-            if(jsonObject.getString("strMeasure"+i)!=null || jsonObject.getString("strIngredient"+i).toString()!=null)
-                result = result + jsonObject.getString("strMeasure"+i).toString() +" , "+ jsonObject.getString("strIngredient"+i).toString()
+            if(jsonObject.getString("strMeasure"+i).toString()!="null" || jsonObject.getString("strIngredient"+i).toString()!="null")
+                result = result + jsonObject.getString("strMeasure"+i).toString() +"  "+ jsonObject.getString("strIngredient"+i).toString()+ " , "
         }
 
         return result
