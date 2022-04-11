@@ -11,6 +11,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.mycocktails.data.model.SearchResultModel
 
 class SearchResultAdapter (
@@ -50,13 +51,20 @@ class SearchResultAdapter (
 
         holder.showDetialsButton.setOnClickListener {
             val myIntent = Intent(cxt, SearchDetailsActivity::class.java)
-            myIntent.putExtra("key", "value") //Optional parameters
+            myIntent.putExtra("itemId", currentItem.idDrink) //Optional parameters
+            myIntent.putExtra("mode", currentItem.mode) //Optional parameters
+            myIntent.putExtra("itemName", currentItem.strDrink) //Optional parameters
             cxt.startActivity(myIntent)
         }
 
         holder.category.text = currentItem.category
         holder.itemName.text = currentItem.strDrink
 
+        Glide
+            .with(cxt)
+            .load(currentItem.strDrinkThumb)
+            .centerCrop()
+            .into(holder.realimage);
     }
 
 

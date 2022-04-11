@@ -10,6 +10,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.mycocktails.Utils
 import com.mycocktails.data.model.Category
+import com.mycocktails.data.model.CocktailDetail
 import com.mycocktails.data.model.Ingredient
 import com.mycocktails.data.model.SearchResultModel
 import org.json.JSONObject
@@ -77,6 +78,7 @@ class Network private constructor (context: Context) {
 
     fun getCategoryFilterList(
         itemName:String,
+        mode:String,
         listener: Response.Listener<ArrayList<SearchResultModel>>,
         errorListener: Response.ErrorListener
     ): StringRequest {
@@ -92,7 +94,8 @@ class Network private constructor (context: Context) {
                             JSONObject(list.get(i).toString()).getString("strDrink"),
                             JSONObject(list.get(i).toString()).getString("strDrinkThumb"),
                             JSONObject(list.get(i).toString()).getString("idDrink"),
-                            itemName
+                            itemName,
+                            mode
                         )
                     )
                 }
@@ -109,6 +112,7 @@ class Network private constructor (context: Context) {
 
     fun getIngredientFilterList(
         itemName:String,
+        mode:String,
         listener: Response.Listener<ArrayList<SearchResultModel>>,
         errorListener: Response.ErrorListener
     ): StringRequest {
@@ -124,7 +128,8 @@ class Network private constructor (context: Context) {
                             JSONObject(list.get(i).toString()).getString("strDrink"),
                             JSONObject(list.get(i).toString()).getString("strDrinkThumb"),
                             JSONObject(list.get(i).toString()).getString("idDrink"),
-                            itemName
+                            itemName,
+                            mode
                         )
                     )
                 }
@@ -137,6 +142,53 @@ class Network private constructor (context: Context) {
             })
 
         return stringRequest
+    }
+
+    fun getFullCocktailDetail(
+        itemId:String,
+        listener: Response.Listener<ArrayList<CocktailDetail>>,
+        errorListener: Response.ErrorListener
+    ): StringRequest {
+        val stringRequest = StringRequest(
+            Request.Method.GET, Utils.COCKTAIL_DETAILS_URL+itemId,
+            Response.Listener { response ->
+                val obj = JSONObject(response)
+                val list = obj.getJSONArray("drinks")
+                var newList = ArrayList<CocktailDetail>()
+                for(i in 0 until list.length()){
+                    newList.add(
+                        CocktailDetail(
+                            JSONObject(list.get(i).toString()).getString("idDrink"),
+                            JSONObject(list.get(i).toString()).getString("strDrink"),
+                            JSONObject(list.get(i).toString()).getString("strAlcoholic"),
+                            JSONObject(list.get(i).toString()).getString("strGlass"),
+                            JSONObject(list.get(i).toString()).getString("strCategory"),
+                            JSONObject(list.get(i).toString()).getString("strInstructions"),
+                            JSONObject(list.get(i).toString()).getString("strDrinkThumb"),
+                            getCombineIngredients(JSONObject(list.get(i).toString()))
+                        )
+                    )
+                }
+                listener.onResponse(newList)
+                Log.v("Hello","Response is: ${response}")
+            },
+            Response.ErrorListener {
+                errorListener.onErrorResponse(it)
+                Log.v("Hello", "That didn't work!")
+            })
+
+        return stringRequest
+    }
+
+    fun getCombineIngredients(jsonObject: JSONObject):String{
+        var result = ""
+
+        for (i in 1 until 16){
+            if(jsonObject.getString("strMeasure"+i)!=null || jsonObject.getString("strIngredient"+i).toString()!=null)
+                result = result + jsonObject.getString("strMeasure"+i).toString() +" , "+ jsonObject.getString("strIngredient"+i).toString()
+        }
+
+        return result
     }
 }
 
