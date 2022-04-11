@@ -106,28 +106,19 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:gravity="center"
-                            android:text="Enter the Ingredient"
+                            android:text="Search the Ingredient"
                             android:paddingBottom="8dp"
                             android:textSize="18sp"
                             android:textStyle="bold"
                             android:textColor="@color/purple_200"
                             />
 
-                        <androidx.appcompat.widget.SearchView
-                            android:id="@+id/searchStudent"
+                        <com.kenmeidearu.searchablespinnerlibrary.SearchableSpinner
+                            android:id="@+id/searchableSpinner"
                             android:layout_width="match_parent"
-                            android:layout_margin="8dp"
-                            android:submitBackground="@drawable/bg_rounded_grey"
-                            android:background="@drawable/bg_rounded_grey"
-                            app:queryBackground="@null"
-                            app:iconifiedByDefault="false"
-                            android:layout_height="wrap_content"
-                            app:layout_constraintBottom_toTopOf="@+id/recyclerview"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
+                            android:backgroundTint="@color/purple_200"
+                            android:layout_height="56dp" />
 
-                        </androidx.appcompat.widget.SearchView>
                     </androidx.appcompat.widget.LinearLayoutCompat>
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:id="@+id/categoryLayout"
@@ -154,7 +145,7 @@
                             />
 
                         <Spinner
-                            android:id="@+id/textView34"
+                            android:id="@+id/spinner"
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
                             android:layout_weight="1"
@@ -211,7 +202,7 @@
                                 android:textStyle="bold"
                                 android:layout_marginRight="8dp"
                                 android:layout_gravity="center_horizontal"
-                                android:checked="false"
+                                android:checked="true"
                                 android:textSize="16sp" />
 
                             <RadioButton
