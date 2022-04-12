@@ -73,11 +73,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     myIntent.putExtra("mode", mode) //Optional parameters
                     myIntent.putExtra("itemName", selectedCategory) //Optional parameters
                     this@MainActivity.startActivity(myIntent)
-                    Toast.makeText(
-                        this,
-                        "Done " + radioButtonSelected!!.text.toString() + " => " + mode + " => " + selectedCategory,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 } else {
                     Toast.makeText(
                         this,
@@ -95,11 +90,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                     myIntent.putExtra("mode", mode) //Optional parameters
                     myIntent.putExtra("itemName", myIngredientsList.get(searchView.selectedItemPosition-1).nilai1.toString()) //Optional parameters
                     this@MainActivity.startActivity(myIntent)
-                    Toast.makeText(
-                        this,
-                        "Done " + radioButtonSelected!!.text.toString() + " => " + mode + " => " +myIngredientsList.get(searchView.selectedItemPosition-1).nilai1 ,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 } else {
                     Toast.makeText(
                         this,
