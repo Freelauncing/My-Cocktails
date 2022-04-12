@@ -2,6 +2,9 @@ package com.mycocktails
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.mycocktails.data.database.getDatabase
 import com.mycocktails.data.model.Category
 import com.mycocktails.data.model.CocktailDetail
 import com.mycocktails.data.model.SearchResultModel
@@ -20,6 +24,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.w3c.dom.Text
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.net.URL
 
 
 class SearchDetailsActivity : AppCompatActivity() {
@@ -39,7 +46,10 @@ class SearchDetailsActivity : AppCompatActivity() {
     val network = Network.getInstance(this@SearchDetailsActivity)
     val queue by lazy{ Volley.newRequestQueue(this@SearchDetailsActivity)}
 
+    val database by lazy { getDatabase(this@SearchDetailsActivity) }
+
     private var itemId:String = ""
+    private var SearchType:String = ""
 
     private var myCocktailDetailList:ArrayList<CocktailDetail> = ArrayList()
 
@@ -51,9 +61,16 @@ class SearchDetailsActivity : AppCompatActivity() {
         getSupportActionBar()?.hide()
 
         itemId = intent.getStringExtra("itemId").toString()
+        SearchType = intent.getStringExtra("searchType").toString()
+
+        if(SearchType == "Local Search"){
+            addToDatabaseBtn.isEnabled = false
+            addToDatabaseBtn.isClickable = false
+            addToDatabaseBtn.setTextColor(Color.parseColor("#FF000000"))
+        }
 
         addToDatabaseBtn.setOnClickListener {
-            showDatabaseDialogue(this,layoutInflater)
+            storeIntoDatabase()
         }
 
         scoreitBtn.setOnClickListener {
@@ -61,16 +78,74 @@ class SearchDetailsActivity : AppCompatActivity() {
         }
     }
 
+    private fun storeIntoDatabase() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val res = database.cocktailDetailDao.insertCocktail(
+                CocktailDetail(
+                    myCocktailDetailList.get(0).idDrink,
+                    myCocktailDetailList.get(0).strDrink,
+                    myCocktailDetailList.get(0).strAlcoholic,
+                    myCocktailDetailList.get(0).strGlass,
+                    myCocktailDetailList.get(0).strCategory,
+                    myCocktailDetailList.get(0).strInstructions,
+                    myCocktailDetailList.get(0).strDrinkThumb,
+                    myCocktailDetailList.get(0).ingredients,
+                    convertToByteArray(myCocktailDetailList.get(0).strDrinkThumb)
+                )
+            )
+            launch(Dispatchers.Main) {
+                showDatabaseDialogue(this@SearchDetailsActivity,layoutInflater)
+            }
+        }
+
+    }
+
+    suspend fun convertToByteArray(url:String): ByteArray {
+        val baos = ByteArrayOutputStream()
+        val bitmap = getImageBitmap(url)
+        bitmap!!.compress(Bitmap.CompressFormat.PNG, 100, baos)
+        val photo: ByteArray = baos.toByteArray()
+        return photo
+    }
+
+    suspend fun getImageBitmap(url:String): Bitmap? {
+        try {
+            var image: Bitmap? = null
+            withContext(Dispatchers.IO) {
+                val url = URL(url)
+                image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
+            }
+            Log.v("CHECK",url)
+            Log.v("CHECK",image.toString())
+            return image
+        } catch (e: IOException) {
+            System.out.println(e)
+        }
+        return null
+    }
+
     override fun onResume() {
         super.onResume()
 
-        fetchCocktailDetail(itemId, Response.Listener {
-            myCocktailDetailList = it
-            setDetails()
-                                                      Log.v("Hello,",it.get(0).toString())
-        }, Response.ErrorListener {
-            Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
-        })
+        if(SearchType == "Local Search"){
+            GlobalScope.launch(Dispatchers.IO) {
+                val res = database.cocktailDetailDao.getCocktailDetailbyId(itemId)
+                launch(Dispatchers.Main) {
+                    myCocktailDetailList = res as ArrayList<CocktailDetail>
+                    setDetails()
+                }
+            }
+
+        }else if(SearchType == "Inet Search"){
+            fetchCocktailDetail(itemId, Response.Listener {
+                myCocktailDetailList = it
+                setDetails()
+                Log.v("Hello,",it.get(0).toString())
+            }, Response.ErrorListener {
+                Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
+            })
+        }
+
     }
 
     private fun setDetails() {
@@ -81,10 +156,17 @@ class SearchDetailsActivity : AppCompatActivity() {
         preperations.text = myCocktailDetailList.get(0).strInstructions
         ingredients.text = myCocktailDetailList.get(0).ingredients
 
-        Glide.with(this)
-            .load(myCocktailDetailList.get(0).strDrinkThumb)
-            .centerCrop()
-            .into(realimage);
+        if(myCocktailDetailList.get(0).imageData!=null){
+            val bmp = BitmapFactory.decodeByteArray(myCocktailDetailList.get(0).imageData, 0, myCocktailDetailList.get(0).imageData!!.size)
+            realimage.setImageBitmap(bmp)
+        }
+        else {
+            Glide
+                .with(this)
+                .load(myCocktailDetailList.get(0).strDrinkThumb)
+                .centerCrop()
+                .into(realimage);
+        }
     }
 
     private fun fetchCocktailDetail(itemId: String,

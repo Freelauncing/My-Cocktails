@@ -5,5 +5,6 @@ data class SearchResultModel(
     var strDrinkThumb:String,
     var idDrink:String,
     var category:String,
-    var mode:String
+    var mode:String,
+    var imageData:ByteArray? = null
 )

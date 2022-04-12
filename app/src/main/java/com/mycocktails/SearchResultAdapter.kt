@@ -54,17 +54,28 @@ class SearchResultAdapter (
             myIntent.putExtra("itemId", currentItem.idDrink) //Optional parameters
             myIntent.putExtra("mode", currentItem.mode) //Optional parameters
             myIntent.putExtra("itemName", currentItem.strDrink) //Optional parameters
+            if(currentItem.imageData!=null){
+                myIntent.putExtra("searchType", "Local Search") //Optional parameters
+            }else{
+                myIntent.putExtra("searchType", "Inet Search") //Optional parameters
+            }
             cxt.startActivity(myIntent)
         }
 
         holder.category.text = currentItem.category
         holder.itemName.text = currentItem.strDrink
 
-        Glide
-            .with(cxt)
-            .load(currentItem.strDrinkThumb)
-            .centerCrop()
-            .into(holder.realimage);
+        if(currentItem.imageData!=null){
+            val bmp = BitmapFactory.decodeByteArray(currentItem.imageData, 0, currentItem.imageData!!.size)
+            holder.realimage.setImageBitmap(bmp)
+        }
+        else {
+            Glide
+                .with(cxt)
+                .load(currentItem.strDrinkThumb)
+                .centerCrop()
+                .into(holder.realimage);
+        }
     }
 
 

@@ -7,6 +7,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
+import com.mycocktails.data.database.getDatabase
+import com.mycocktails.data.model.CocktailDetail
 import com.mycocktails.data.model.SearchResultModel
 import com.mycocktails.data.network.Network
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +23,8 @@ class SearchResultActivity : AppCompatActivity() {
 
     val network = Network.getInstance(this@SearchResultActivity)
     val queue by lazy{ Volley.newRequestQueue(this@SearchResultActivity)}
+
+    val database by lazy { getDatabase(this@SearchResultActivity) }
 
     private var Mode:String = ""
     private var SearchType:String = ""
@@ -49,17 +53,63 @@ class SearchResultActivity : AppCompatActivity() {
         super.onResume()
 
         if(Mode == "category"){
-            fetchCategoryList(itemName,Mode,Response.Listener {
-                searchResultAdapter!!.swapList(it)
-            },Response.ErrorListener {
-                Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
-            })
+            if(SearchType == "Local Search"){
+                GlobalScope.launch(Dispatchers.IO) {
+                    val res = database.cocktailDetailDao.filterCocktailByCategory(itemName)
+                    var myResults:ArrayList<SearchResultModel> = ArrayList()
+                    res.forEach {
+                        myResults.add(
+                            SearchResultModel(
+                                it.strDrink,
+                                it.strDrinkThumb,
+                                it.idDrink,
+                                it.strCategory,
+                                "category",
+                                it.imageData
+                            )
+                        )
+                    }
+                    launch(Dispatchers.Main) {
+                        searchResultAdapter!!.swapList(myResults)
+                    }
+                }
+
+            }else if(SearchType == "Inet Search"){
+                fetchCategoryList(itemName,Mode,Response.Listener {
+                    searchResultAdapter!!.swapList(it)
+                },Response.ErrorListener {
+                    Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
+                })
+            }
         }else if(Mode == "ingredient"){
-            fetchIngredientList(itemName,Mode,Response.Listener {
-                searchResultAdapter!!.swapList(it)
-            },Response.ErrorListener {
-                Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
-            })
+            if(SearchType == "Local Search"){
+                GlobalScope.launch(Dispatchers.IO) {
+                    val res = database.cocktailDetailDao.filterCocktailsByIngredients(itemName)
+                    var myResults:ArrayList<SearchResultModel> = ArrayList()
+                    res.forEach {
+                        myResults.add(
+                            SearchResultModel(
+                                it.strDrink,
+                                it.strDrinkThumb,
+                                it.idDrink,
+                                it.strCategory,
+                                "ingredient",
+                                it.imageData
+                            )
+                        )
+                    }
+                    launch(Dispatchers.Main) {
+                        searchResultAdapter!!.swapList(myResults)
+                    }
+                }
+
+            }else if(SearchType == "Inet Search") {
+                fetchIngredientList(itemName, Mode, Response.Listener {
+                    searchResultAdapter!!.swapList(it)
+                }, Response.ErrorListener {
+                    Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show()
+                })
+            }
         }
     }
 
