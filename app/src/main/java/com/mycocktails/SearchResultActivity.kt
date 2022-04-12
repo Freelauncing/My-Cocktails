@@ -2,6 +2,9 @@ package com.mycocktails
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +25,8 @@ import kotlinx.coroutines.withContext
 
 class SearchResultActivity : AppCompatActivity() {
 
+    val loading by lazy { findViewById<ProgressBar>(R.id.loading) }
+    val noResult by lazy { findViewById<TextView>(R.id.noResult) }
     val recyclerview by lazy { findViewById<RecyclerView>(R.id.recyclerview) }
     private var searchResultAdapter: SearchResultAdapter? = null
 
@@ -56,6 +61,8 @@ class SearchResultActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        showLoading()
+
         if(Mode == MODE_CATEGORY){
             if(SearchType == LOCAL_SEARCH){
                 GlobalScope.launch(Dispatchers.IO) {
@@ -75,14 +82,17 @@ class SearchResultActivity : AppCompatActivity() {
                     }
                     launch(Dispatchers.Main) {
                         searchResultAdapter!!.swapList(myResults)
+                        hideLoading()
                     }
                 }
 
             }else if(SearchType == INET_SEARCH){
                 fetchCategoryList(itemName,Mode,Response.Listener {
                     searchResultAdapter!!.swapList(it)
+                    hideLoading()
                 },Response.ErrorListener {
                     Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
+                    hideLoading()
                 })
             }
         }else if(Mode == MODE_INGREDIENT){
@@ -104,14 +114,17 @@ class SearchResultActivity : AppCompatActivity() {
                     }
                     launch(Dispatchers.Main) {
                         searchResultAdapter!!.swapList(myResults)
+                        hideLoading()
                     }
                 }
 
             }else if(SearchType == INET_SEARCH) {
                 fetchIngredientList(itemName, Mode, Response.Listener {
                     searchResultAdapter!!.swapList(it)
+                    hideLoading()
                 }, Response.ErrorListener {
                     Toast.makeText(this, it.toString(), Toast.LENGTH_SHORT).show()
+                    hideLoading()
                 })
             }
         }
@@ -156,4 +169,18 @@ class SearchResultActivity : AppCompatActivity() {
         }
     }
 
+    fun showLoading(){
+        if(!loading.isShown)
+            loading.visibility = View.VISIBLE
+    }
+
+    fun hideLoading(){
+        if(loading.isShown)
+            loading.visibility = View.GONE
+
+        if(searchResultAdapter!!.itemCount == 0){
+            noResult.visibility = View.VISIBLE
+        }
+
+    }
 }

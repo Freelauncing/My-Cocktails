@@ -250,6 +250,13 @@
                     </androidx.appcompat.widget.LinearLayoutCompat>
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
+                <ProgressBar
+                    android:id="@+id/loading"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    ></ProgressBar>
             </FrameLayout>
         </androidx.cardview.widget.CardView>
     </RelativeLayout>

@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import android.widget.RatingBar.OnRatingBarChangeListener
 import androidx.appcompat.app.AppCompatActivity
@@ -40,7 +41,7 @@ class SearchDetailsActivity : AppCompatActivity() {
     val preperations by lazy { findViewById<TextView>(R.id.preperations) }
     val ingredients by lazy { findViewById<TextView>(R.id.ingredients) }
     val realimage by lazy { findViewById<ImageView>(R.id.realimage) }
-
+    val loading by lazy { findViewById<ProgressBar>(R.id.loading) }
 
     val addToDatabaseBtn by lazy { findViewById<Button>(R.id.addToDatabase) }
     val scoreitBtn by lazy { findViewById<Button>(R.id.scoreit) }
@@ -81,6 +82,7 @@ class SearchDetailsActivity : AppCompatActivity() {
     }
 
     private fun storeIntoDatabase() {
+        showLoading()
         GlobalScope.launch(Dispatchers.IO) {
             val res = database.cocktailDetailDao.insertCocktail(
                 CocktailDetail(
@@ -97,6 +99,7 @@ class SearchDetailsActivity : AppCompatActivity() {
             )
             launch(Dispatchers.Main) {
                 showDatabaseDialogue(this@SearchDetailsActivity,layoutInflater)
+                hideLoading()
             }
         }
 
@@ -129,12 +132,14 @@ class SearchDetailsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        showLoading()
         if(SearchType == LOCAL_SEARCH){
             GlobalScope.launch(Dispatchers.IO) {
                 val res = database.cocktailDetailDao.getCocktailDetailbyId(itemId)
                 launch(Dispatchers.Main) {
                     myCocktailDetailList = res as ArrayList<CocktailDetail>
                     setDetails()
+                    hideLoading()
                 }
             }
 
@@ -142,9 +147,11 @@ class SearchDetailsActivity : AppCompatActivity() {
             fetchCocktailDetail(itemId, Response.Listener {
                 myCocktailDetailList = it
                 setDetails()
+                hideLoading()
                 Log.v("Hello,",it.get(0).toString())
             }, Response.ErrorListener {
                 Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
+                hideLoading()
             })
         }
 
@@ -230,5 +237,15 @@ class SearchDetailsActivity : AppCompatActivity() {
         }
 
         alertDialog.show()
+    }
+
+    fun showLoading(){
+        if(!loading.isShown)
+            loading.visibility = View.VISIBLE
+    }
+
+    fun hideLoading(){
+        if(loading.isShown)
+            loading.visibility = View.GONE
     }
 }

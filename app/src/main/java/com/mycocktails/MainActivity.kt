@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     val spinner by lazy { findViewById<Spinner>(R.id.spinner) }
     val radioGroup by lazy {   findViewById<RadioGroup>(R.id.radioGroup)}
     val searchView by lazy { findViewById<SearchableSpinner>(R.id.searchableSpinner) }
+    val loading by lazy { findViewById<ProgressBar>(R.id.loading) }
     var radioButtonSelected: RadioButton? = null
 
     val network by lazy { Network.getInstance(this@MainActivity) }
@@ -84,8 +85,11 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }else if(mode == MODE_INGREDIENT && searchView.selectedItemPosition>-1){
-                if (radioButtonSelected != null && !myIngredientsList.get(searchView.selectedItemPosition-1).nilai1.toString().trim().isNullOrEmpty()) {
+            }else if(mode == MODE_INGREDIENT && searchView.selectedItemPosition>0){
+                if (radioButtonSelected != null &&
+                    !myIngredientsList.get(searchView.selectedItemPosition-1).nilai1.toString().trim().isNullOrEmpty() &&
+                    !myIngredientsList.get(searchView.selectedItemPosition-1).nilai1.toString().trim().equals("Select Ingredient")
+                ) {
                     val myIntent = Intent(this@MainActivity, SearchResultActivity::class.java)
                     myIntent.putExtra("searchType", radioButtonSelected!!.text.toString()) //Optional parameters
                     myIntent.putExtra("mode", mode) //Optional parameters
@@ -114,7 +118,9 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     override fun onResume() {
         super.onResume()
 
+        showLoading()
         fetchOrSetCategories(Response.Listener {
+
             myCategoryList = it
             val arraySpinner = it.map {
                 it.strCategory
@@ -126,10 +132,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.setAdapter(adapter)
+            hideLoading()
         },Response.ErrorListener {
             Toast.makeText(this,it.toString(),Toast.LENGTH_SHORT).show()
+            hideLoading()
         })
 
+        showLoading()
         fetchOrSetIngredients(Response.Listener {
 
             searchView.setTitleList("Select Ingredient") //use this to create initial search first
@@ -141,10 +150,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             }
 
             searchView.setAdapter(myIngredientsList, 2, 1) // type spinner 1-4, searh option 1-4
+            hideLoading()
         },Response.ErrorListener {
             Toast.makeText(this,it.toString(),Toast.LENGTH_SHORT).show()
+            hideLoading()
         })
     }
+
 
     fun fetchOrSetCategories(listener: Response.Listener<ArrayList<Category>>, errorListener: Response.ErrorListener) {
         // Launch a coroutine
@@ -208,4 +220,13 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             selectedCategory = myCategoryList.get(0).strCategory
     }
 
+    fun showLoading(){
+        if(!loading.isShown)
+            loading.visibility = View.VISIBLE
+    }
+
+    fun hideLoading(){
+        if(loading.isShown)
+            loading.visibility = View.GONE
+    }
 }
