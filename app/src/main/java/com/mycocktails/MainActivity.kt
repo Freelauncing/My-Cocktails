@@ -10,6 +10,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.kenmeidearu.searchablespinnerlibrary.SearchableSpinner
 import com.kenmeidearu.searchablespinnerlibrary.mListString
+import com.mycocktails.data.database.getDatabase
 import com.mycocktails.data.model.Category
 import com.mycocktails.data.model.Ingredient
 import com.mycocktails.data.network.Network
@@ -31,8 +32,10 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     val searchView by lazy { findViewById<SearchableSpinner>(R.id.searchableSpinner) }
     var radioButtonSelected: RadioButton? = null
 
-    val network = Network.getInstance(this@MainActivity)
+    val network by lazy { Network.getInstance(this@MainActivity) }
     val queue by lazy{ Volley.newRequestQueue(this@MainActivity)}
+
+    val database by lazy { getDatabase(this@MainActivity)}
 
     private var selectedCategory = ""
     private var myCategoryList:ArrayList<Category> = ArrayList()
@@ -145,31 +148,49 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
         // Launch a coroutine
         GlobalScope.launch(Dispatchers.Main) {
             val categories = withContext(Dispatchers.IO) {
-                //database.dao.getCategories()
+                database.categoryDao.getCategories()
             }
-           val request =  network.getCategories(Response.Listener {
-                listener.onResponse(it)
-            },Response.ErrorListener {
-                errorListener.onErrorResponse(it)
-            })
+            if(categories.isEmpty()) {
+                val request = network.getCategories(Response.Listener {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        it.forEach {
+                            database.categoryDao.insertCategory(it)
+                        }
+                        listener.onResponse(it)
+                    }
+                }, Response.ErrorListener {
+                    errorListener.onErrorResponse(it)
+                })
 
-            queue.add(request)
+                queue.add(request)
+            }else{
+                listener.onResponse(categories as ArrayList<Category>)
+            }
         }
     }
 
     fun fetchOrSetIngredients(listener: Response.Listener<ArrayList<Ingredient>>, errorListener: Response.ErrorListener) {
         // Launch a coroutine
         GlobalScope.launch(Dispatchers.Main) {
-            val categories = withContext(Dispatchers.IO) {
-                //database.dao.getIngredient()
+            val ingredients = withContext(Dispatchers.IO) {
+                database.ingredientDao.getIngredient()
             }
-            val request =  network.getIngredients(Response.Listener {
-                listener.onResponse(it)
-            },Response.ErrorListener {
-                errorListener.onErrorResponse(it)
-            })
+            if(ingredients.isEmpty()) {
+                val request = network.getIngredients(Response.Listener {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        it.forEach {
+                            database.ingredientDao.insertIngredient(it)
+                        }
+                        listener.onResponse(it)
+                    }
+                }, Response.ErrorListener {
+                    errorListener.onErrorResponse(it)
+                })
 
-            queue.add(request)
+                queue.add(request)
+            }else{
+                listener.onResponse(ingredients as ArrayList<Ingredient>)
+            }
         }
     }
 
