@@ -12,6 +12,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.mycocktails.Utils.Companion.INET_SEARCH
+import com.mycocktails.Utils.Companion.LOCAL_SEARCH
 import com.mycocktails.data.model.SearchResultModel
 
 class SearchResultAdapter (
@@ -55,9 +57,9 @@ class SearchResultAdapter (
             myIntent.putExtra("mode", currentItem.mode) //Optional parameters
             myIntent.putExtra("itemName", currentItem.strDrink) //Optional parameters
             if(currentItem.imageData!=null){
-                myIntent.putExtra("searchType", "Local Search") //Optional parameters
+                myIntent.putExtra("searchType", LOCAL_SEARCH) //Optional parameters
             }else{
-                myIntent.putExtra("searchType", "Inet Search") //Optional parameters
+                myIntent.putExtra("searchType", INET_SEARCH) //Optional parameters
             }
             cxt.startActivity(myIntent)
         }

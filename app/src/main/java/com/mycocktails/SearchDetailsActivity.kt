@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.mycocktails.Utils.Companion.INET_SEARCH
+import com.mycocktails.Utils.Companion.LOCAL_SEARCH
 import com.mycocktails.data.database.getDatabase
 import com.mycocktails.data.model.Category
 import com.mycocktails.data.model.CocktailDetail
@@ -63,7 +65,7 @@ class SearchDetailsActivity : AppCompatActivity() {
         itemId = intent.getStringExtra("itemId").toString()
         SearchType = intent.getStringExtra("searchType").toString()
 
-        if(SearchType == "Local Search"){
+        if(SearchType == LOCAL_SEARCH){
             addToDatabaseBtn.isEnabled = false
             addToDatabaseBtn.isClickable = false
             addToDatabaseBtn.setTextColor(Color.parseColor("#FF000000"))
@@ -127,7 +129,7 @@ class SearchDetailsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if(SearchType == "Local Search"){
+        if(SearchType == LOCAL_SEARCH){
             GlobalScope.launch(Dispatchers.IO) {
                 val res = database.cocktailDetailDao.getCocktailDetailbyId(itemId)
                 launch(Dispatchers.Main) {
@@ -136,7 +138,7 @@ class SearchDetailsActivity : AppCompatActivity() {
                 }
             }
 
-        }else if(SearchType == "Inet Search"){
+        }else if(SearchType == INET_SEARCH){
             fetchCocktailDetail(itemId, Response.Listener {
                 myCocktailDetailList = it
                 setDetails()
@@ -173,9 +175,6 @@ class SearchDetailsActivity : AppCompatActivity() {
                                     listener: Response.Listener<ArrayList<CocktailDetail>>,
                                     errorListener: Response.ErrorListener) {
         GlobalScope.launch(Dispatchers.Main) {
-            val categories = withContext(Dispatchers.IO) {
-                //database.dao.getIngredient()
-            }
             val request =  network.getFullCocktailDetail(itemId,Response.Listener {
                 listener.onResponse(it)
             }, Response.ErrorListener {

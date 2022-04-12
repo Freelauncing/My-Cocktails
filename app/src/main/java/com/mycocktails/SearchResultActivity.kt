@@ -7,6 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
+import com.mycocktails.Utils.Companion.INET_SEARCH
+import com.mycocktails.Utils.Companion.LOCAL_SEARCH
+import com.mycocktails.Utils.Companion.MODE_CATEGORY
+import com.mycocktails.Utils.Companion.MODE_INGREDIENT
 import com.mycocktails.data.database.getDatabase
 import com.mycocktails.data.model.CocktailDetail
 import com.mycocktails.data.model.SearchResultModel
@@ -52,8 +56,8 @@ class SearchResultActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        if(Mode == "category"){
-            if(SearchType == "Local Search"){
+        if(Mode == MODE_CATEGORY){
+            if(SearchType == LOCAL_SEARCH){
                 GlobalScope.launch(Dispatchers.IO) {
                     val res = database.cocktailDetailDao.filterCocktailByCategory(itemName)
                     var myResults:ArrayList<SearchResultModel> = ArrayList()
@@ -64,7 +68,7 @@ class SearchResultActivity : AppCompatActivity() {
                                 it.strDrinkThumb,
                                 it.idDrink,
                                 it.strCategory,
-                                "category",
+                                MODE_CATEGORY,
                                 it.imageData
                             )
                         )
@@ -74,15 +78,15 @@ class SearchResultActivity : AppCompatActivity() {
                     }
                 }
 
-            }else if(SearchType == "Inet Search"){
+            }else if(SearchType == INET_SEARCH){
                 fetchCategoryList(itemName,Mode,Response.Listener {
                     searchResultAdapter!!.swapList(it)
                 },Response.ErrorListener {
                     Toast.makeText(this,it.toString(), Toast.LENGTH_SHORT).show()
                 })
             }
-        }else if(Mode == "ingredient"){
-            if(SearchType == "Local Search"){
+        }else if(Mode == MODE_INGREDIENT){
+            if(SearchType == LOCAL_SEARCH){
                 GlobalScope.launch(Dispatchers.IO) {
                     val res = database.cocktailDetailDao.filterCocktailsByIngredients(itemName)
                     var myResults:ArrayList<SearchResultModel> = ArrayList()
@@ -93,7 +97,7 @@ class SearchResultActivity : AppCompatActivity() {
                                 it.strDrinkThumb,
                                 it.idDrink,
                                 it.strCategory,
-                                "ingredient",
+                                MODE_INGREDIENT,
                                 it.imageData
                             )
                         )
@@ -103,7 +107,7 @@ class SearchResultActivity : AppCompatActivity() {
                     }
                 }
 
-            }else if(SearchType == "Inet Search") {
+            }else if(SearchType == INET_SEARCH) {
                 fetchIngredientList(itemName, Mode, Response.Listener {
                     searchResultAdapter!!.swapList(it)
                 }, Response.ErrorListener {
@@ -142,9 +146,6 @@ class SearchResultActivity : AppCompatActivity() {
     ) {
         // Launch a coroutine
         GlobalScope.launch(Dispatchers.Main) {
-            val categories = withContext(Dispatchers.IO) {
-                //database.dao.getIngredient()
-            }
             val request =  network.getIngredientFilterList(itemName,Mode, Response.Listener {
                 listener.onResponse(it)
             }, Response.ErrorListener {

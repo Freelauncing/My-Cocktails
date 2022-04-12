@@ -9,5 +9,7 @@ class Utils {
         val COCKTAIL_DETAILS_URL = "https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i="
         val LOCAL_SEARCH = "Local Search"
         val INET_SEARCH = "Inet Search"
+        val MODE_CATEGORY = "category"
+        val MODE_INGREDIENT = "ingredient"
     }
 }

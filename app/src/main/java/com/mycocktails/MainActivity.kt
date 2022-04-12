@@ -10,6 +10,8 @@ import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.kenmeidearu.searchablespinnerlibrary.SearchableSpinner
 import com.kenmeidearu.searchablespinnerlibrary.mListString
+import com.mycocktails.Utils.Companion.MODE_CATEGORY
+import com.mycocktails.Utils.Companion.MODE_INGREDIENT
 import com.mycocktails.data.database.getDatabase
 import com.mycocktails.data.model.Category
 import com.mycocktails.data.model.Ingredient
@@ -41,19 +43,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
     private var myCategoryList:ArrayList<Category> = ArrayList()
     private val myIngredientsList: ArrayList<mListString> = ArrayList() //must crete this to generate data there are n1-n4
 
-    private var mode :String =  "category"
+    private var mode :String =  MODE_CATEGORY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         categoryBtn.setOnClickListener {
-            mode = "category"
+            mode = MODE_CATEGORY
             categoryLayout.visibility = View.VISIBLE
             ingredientsLayout.visibility = View.GONE
         }
         ingredientBtn.setOnClickListener {
-            mode = "ingredient"
+            mode = MODE_INGREDIENT
             ingredientsLayout.visibility = View.VISIBLE
             categoryLayout.visibility = View.GONE
         }
@@ -63,7 +65,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
             // find the radiobutton by returned id
             radioButtonSelected = findViewById(selectedId);
 
-            if(mode == "category") {
+            if(mode == MODE_CATEGORY) {
                 if (radioButtonSelected != null && !selectedCategory.isNullOrEmpty()) {
                     val myIntent = Intent(this@MainActivity, SearchResultActivity::class.java)
                     myIntent.putExtra("searchType", radioButtonSelected!!.text.toString()) //Optional parameters
@@ -82,7 +84,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            }else if(mode == "ingredient" && searchView.selectedItemPosition>-1){
+            }else if(mode == MODE_INGREDIENT && searchView.selectedItemPosition>-1){
                 if (radioButtonSelected != null && !myIngredientsList.get(searchView.selectedItemPosition-1).nilai1.toString().trim().isNullOrEmpty()) {
                     val myIntent = Intent(this@MainActivity, SearchResultActivity::class.java)
                     myIntent.putExtra("searchType", radioButtonSelected!!.text.toString()) //Optional parameters
